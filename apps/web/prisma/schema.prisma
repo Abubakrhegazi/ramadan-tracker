@@ -1,0 +1,160 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum ResetRule {
+  MIDNIGHT
+  MAGHRIB
+}
+
+enum ActionType {
+  LOG_CREATE
+  LOG_UPDATE
+  LOG_DELETE
+  LOG_ADMIN_OVERRIDE
+  DAY_LOCK
+  DAY_UNLOCK
+  MEMBER_KICK
+  MEMBER_ROLE_CHANGE
+  SETTINGS_UPDATE
+  INVITE_REGENERATE
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memberships GroupMembership[]
+  dailyLogs   DailyLog[]
+  auditLogs   AuditLog[]
+
+  @@index([email])
+}
+
+model Group {
+  id         String   @id @default(cuid())
+  name       String
+  slug       String   @unique
+  inviteCode String   @unique @default(cuid())
+  logoUrl    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  settings    GroupSettings?
+  memberships GroupMembership[]
+  dailyLogs   DailyLog[]
+  auditLogs   AuditLog[]
+  lockedDays  LockedDay[]
+
+  @@index([slug])
+  @@index([inviteCode])
+}
+
+model GroupSettings {
+  id                String    @id @default(cuid())
+  groupId           String    @unique
+  ramadanStartDate  DateTime
+  numDays           Int       @default(30) // 29 or 30
+  timezone          String    @default("Africa/Cairo")
+  resetRule         ResetRule @default(MIDNIGHT)
+  editCutoffHour    Int       @default(3) // 0-23, hour in local tz after which edits are locked
+  taraweehCap       Int       @default(11)
+  tahajjudCap       Int       @default(11)
+  quranPagesCap     Int       @default(20)
+  pointsWeightTaraweeh Float  @default(1.0)
+  pointsWeightTahajjud Float  @default(1.0)
+  pointsWeightQuran    Float  @default(1.0)
+  allowSpectatorLink Boolean  @default(false)
+  spectatorToken     String?  @unique
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
+}
+
+model GroupMembership {
+  id       String   @id @default(cuid())
+  userId   String
+  groupId  String
+  role     Role     @default(MEMBER)
+  joinedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@index([groupId])
+  @@index([userId])
+}
+
+model DailyLog {
+  id              String   @id @default(cuid())
+  userId          String
+  groupId         String
+  dayNumber       Int      // 1..30
+  taraweehRakaat  Int      @default(0)
+  tahajjudRakaat  Int      @default(0)
+  quranPages      Int      @default(0)
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId, dayNumber])
+  @@index([groupId, dayNumber])
+  @@index([userId, groupId])
+  @@index([groupId])
+}
+
+model LockedDay {
+  id        String   @id @default(cuid())
+  groupId   String
+  dayNumber Int
+  lockedAt  DateTime @default(now())
+  lockedBy  String   // userId
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, dayNumber])
+  @@index([groupId])
+}
+
+model AuditLog {
+  id         String     @id @default(cuid())
+  userId     String?    // null if system action
+  groupId    String
+  actionType ActionType
+  entity     String     // "DailyLog", "GroupSettings", etc.
+  entityId   String?
+  oldValue   Json?
+  newValue   Json?
+  ip         String?
+  userAgent  String?
+  timestamp  DateTime   @default(now())
+
+  user  User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  group Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
+  @@index([userId])
+  @@index([groupId, timestamp])
+}

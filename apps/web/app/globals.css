@@ -1,0 +1,209 @@
+/* apps/web/app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --gold: #eab308;
+    --gold-light: #fde047;
+    --gold-dark: #a16207;
+    --night: #0a0e1a;
+    --night-800: #111827;
+    --night-700: #1f2937;
+    --emerald: #10b981;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: #0a0e1a;
+    background-image: 
+      radial-gradient(ellipse at 20% 0%, rgba(234, 179, 8, 0.05) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 100%, rgba(16, 185, 129, 0.03) 0%, transparent 60%);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background-color: rgba(234, 179, 8, 0.3);
+    color: #fff;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #111827;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #374151;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #eab308;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-night-800 border border-white/10 rounded-2xl;
+  }
+
+  .card-gold {
+    @apply bg-night-800 border border-gold-500/30 rounded-2xl;
+  }
+
+  .btn-primary {
+    @apply bg-gold-500 hover:bg-gold-400 text-black font-bold py-3 px-6 rounded-xl 
+           transition-all duration-200 active:scale-95 disabled:opacity-50 
+           disabled:cursor-not-allowed shadow-lg shadow-gold-500/20;
+  }
+
+  .btn-secondary {
+    @apply bg-white/10 hover:bg-white/15 text-white py-3 px-6 rounded-xl 
+           transition-all duration-200 active:scale-95 border border-white/10;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded-lg 
+           transition-all duration-200 active:scale-95;
+  }
+
+  .input {
+    @apply w-full bg-night-700 border border-white/10 rounded-xl px-4 py-3 text-white
+           placeholder-white/30 focus:outline-none focus:border-gold-500/50 focus:ring-1 
+           focus:ring-gold-500/30 transition-all duration-200;
+  }
+
+  .label {
+    @apply block text-sm text-white/60 mb-2 font-medium;
+  }
+
+  .badge-gold {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs 
+           bg-gold-500/20 text-gold-400 border border-gold-500/30;
+  }
+
+  .badge-emerald {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs 
+           bg-emerald-500/20 text-emerald-400 border border-emerald-500/30;
+  }
+
+  .rank-1 {
+    @apply text-gold-400;
+  }
+  .rank-2 {
+    @apply text-slate-300;
+  }
+  .rank-3 {
+    @apply text-amber-600;
+  }
+
+  .rakaat-btn {
+    @apply w-10 h-10 rounded-full border-2 font-bold text-sm transition-all duration-150
+           flex items-center justify-center cursor-pointer select-none active:scale-90;
+  }
+
+  .rakaat-btn-active {
+    @apply bg-gold-500 border-gold-400 text-black shadow-lg shadow-gold-500/30;
+  }
+
+  .rakaat-btn-inactive {
+    @apply bg-night-700 border-white/10 text-white/40 hover:border-white/30;
+  }
+
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      #1f2937 25%,
+      #374151 50%,
+      #1f2937 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .star-bg::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.15) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 45%, rgba(255,255,255,0.1) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 25%, rgba(255,255,255,0.12) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 60%, rgba(255,255,255,0.08) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 35%, rgba(255,255,255,0.1) 0%, transparent 100%),
+      radial-gradient(2px 2px at 20% 80%, rgba(255,255,255,0.06) 0%, transparent 100%),
+      radial-gradient(2px 2px at 60% 90%, rgba(255,255,255,0.05) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 10%, rgba(255,255,255,0.15) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGold {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(234, 179, 8, 0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out both;
+}
+
+.animate-pulse-gold {
+  animation: pulseGold 2s ease-in-out infinite;
+}
+
+/* RTL number inputs */
+input[type="number"] {
+  direction: ltr;
+  text-align: center;
+}
+
+/* Arabic text specific */
+.text-arabic {
+  font-family: 'Amiri', serif;
+  letter-spacing: 0.02em;
+}
+
+/* Gradient text */
+.text-gradient-gold {
+  background: linear-gradient(135deg, #fde047, #eab308, #ca8a04);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Heatmap cell colors */
+.heat-0 { background-color: #1f2937; }
+.heat-1 { background-color: rgba(234, 179, 8, 0.15); }
+.heat-2 { background-color: rgba(234, 179, 8, 0.3); }
+.heat-3 { background-color: rgba(234, 179, 8, 0.5); }
+.heat-4 { background-color: rgba(234, 179, 8, 0.7); }
+.heat-5 { background-color: rgba(234, 179, 8, 0.9); }
+
+/* Arabic font switching — when dir is RTL switch to Arabic fonts */
+html[dir="rtl"] body {
+  font-family: 'Tajawal', 'Inter', sans-serif;
+}
+html[dir="rtl"] .font-display {
+  font-family: 'Amiri', 'Outfit', serif;
+}

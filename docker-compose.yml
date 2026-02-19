@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ramadan_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ramadan}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ramadan_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-ramadan_tracker}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ramadan}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ramadan_app
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ramadan}:${POSTGRES_PASSWORD:-ramadan_secret}@postgres:5432/${POSTGRES_DB:-ramadan_tracker}
+      JWT_SECRET: ${JWT_SECRET:-change-this-in-production-min-32-chars}
+      NODE_ENV: production
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
